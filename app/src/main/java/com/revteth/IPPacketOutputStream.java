@@ -70,5 +70,39 @@ public class IPPacketOutputStream extends OutputStream {
       // no packet at all
       return false;
     }
-  }
+    target.write(buffer.array(), buffer.arrayOffset() + buffer.position(), packetLength);
+        buffer.position(buffer.position() + packetLength);
+        return true;
+    }
+
+    /**
+     * Read the packet IP version, assuming that an IP packets is stored at absolute position 0.
+     *
+     * @param buffer the buffer
+     * @return the IP version, or {@code -1} if not available
+     */
+    public static int readPacketVersion(ByteBuffer buffer) {
+        if (!buffer.hasRemaining()) {
+            // buffer is empty
+            return -1;
+        }
+        // version is stored in the 4 first bits
+        byte versionAndIHL = buffer.get(buffer.position());
+        return (versionAndIHL & 0xf0) >> 4;
+    }
+
+    /**
+     * Read the packet length, assuming thatan IP packet is stored at absolute position 0.
+     *
+     * @param buffer the buffer
+     * @return the packet length, or {@code -1} if not available
+     */
+    public static int readPacketLength(ByteBuffer buffer) {
+        if (buffer.limit() < buffer.position() + 4) {
+            // buffer does not even contains the length field
+            return -1;
+        }
+        // packet length is 16 bits starting at offset 2
+        return Binary.unsigned(buffer.getShort(buffer.position() + 2));
+    }
 }
