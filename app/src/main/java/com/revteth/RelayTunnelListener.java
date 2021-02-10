@@ -1,4 +1,4 @@
-package com.revteth
+package com.revteth;
 
 import android.os.Handler;
 

@@ -1,4 +1,4 @@
-package com.revteth
+package com.revteth;
 
 import android.net.VpnService;
 import android.util.Log;
