@@ -30,7 +30,7 @@ public class Notifier {
       notificationBuilder.setContentText(context.getString(R.string.relay_connected));
       notificationBuilder.setSmallIcon(R.drawable.ic_usb_24dp);
     }
-    notificationBuilder.addAction(createStopACtion());
+    notificationBuilder.addAction(createStopAction());
     return notificationBuilder.build();
   }
 
@@ -51,5 +51,40 @@ public class Notifier {
   @TargetApi(26)
   private void deleteNotificationChannel() {
     getNotificationManager().deleteNotificationChannel(CHANNEL_ID);
+  }
+
+  public void start() {
+    context.stopForeground(true);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.0) {
+      createNotificationChannel();
+    }
+    context.startForeground(NOTIIFICATION_ID, createNotification(false));
+  }
+
+  public void stop() {
+    context.stopForeground(true);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.0)  {
+      deleteNotificationChannel();
+    }
+  }
+
+  public void setFailure(boolean failure) {
+    if (this.failure != failure) {
+      this.failure = failure;
+      Notification notification = createNotification(failure);
+      getNotificationManager().notify(NOTIIFICATION_ID, notification);
+    }
+  }
+
+  private Notification.Action createStopAction() {
+    Intent stopIntent = revtethService.createStopIntent(content);
+    PendingIntent stopPendingIntent = PendingIntent.getService(context, 0, stopIntent, PendingIntent.FLAG_ONE_SHOT);
+    @SuppressWarnings("deprecation")
+    Notification.Action.Builder actionBuilder = new Notification.Action.Builder(R.drawable.ic_close_24dp, context.getString(R.string.stop_vpn), stopPendingIntent);
+    return actionBuilder.build();
+  }
+
+  private NotificationManager getNotificationManager() {
+    return (NotificationManager) context.getSystemService(Context.NOTIIFICATION_SERVICE);
   }
 }
